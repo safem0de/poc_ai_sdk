@@ -22,7 +22,7 @@ export const extractSerialFromImage = async (imagePath: string) => {
         system:
             "You will receive a photo of a battery. " +
             "Extract the model and serial number from AMARON label," +
-            "First one below barcode is serial and below is model.",
+            "First one below barcode/QR Code is serial and below is model.",
         schema,
         messages: [
             {
