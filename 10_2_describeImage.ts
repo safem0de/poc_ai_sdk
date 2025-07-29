@@ -1,7 +1,6 @@
 import "dotenv/config";
 import { google } from "@ai-sdk/google";
 import { generateText } from "ai";
-import path from "path";
 
 const systempromt = `You are a helpful assistant that describes images in detail.`+
 `You will be given an image and you need to provide a detailed description of the image.`+
@@ -10,7 +9,6 @@ const systempromt = `You are a helpful assistant that describes images in detail
 
 export const describeImage = async (imageUrl: string) => {
     const model = google("gemini-1.5-flash-latest")
-    // const imageAsUint8Array = readFileSync(imagePath);
 
     const { text } = await generateText({
         model: model,

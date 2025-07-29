@@ -6,9 +6,12 @@ import path from "path";
 import { z } from "zod";
 
 const schema = z.object({
+    modelNumber: z
+        .string()
+        .describe("Battery model number."),
     serialNumber: z
         .string()
-        .describe("The serial number from the battery image."),
+        .describe("Battery serial number."),
 });
 
 export const extractSerialFromImage = async (imagePath: string) => {
@@ -17,7 +20,9 @@ export const extractSerialFromImage = async (imagePath: string) => {
     const { object } = await generateObject({
         model,
         system:
-            "You will receive a photo of a battery. Extract the serial number from any labels or imprints.",
+            "You will receive a photo of a battery. " +
+            "Extract the model and serial number from AMARON label," +
+            "First one below barcode is serial and below is model.",
         schema,
         messages: [
             {
@@ -37,7 +42,7 @@ export const extractSerialFromImage = async (imagePath: string) => {
 
 async function main() {
     const result = await extractSerialFromImage(
-        path.join(__dirname, "./test_battery.jpg")
+        path.join(__dirname, "./fireworks.jpg")
     );
     console.log(result);
 }
