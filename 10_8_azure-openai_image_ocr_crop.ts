@@ -1,15 +1,31 @@
 import "dotenv/config";
 import { createAzure } from '@ai-sdk/azure';
 import { generateObject } from "ai";
-import { readFileSync } from "fs";
 import path from "path";
 import { z } from "zod";
+import sharp from "sharp";
 
-const endpoint = process.env.AZURE_ENDPOINT!;
-const modelName = process.env.AZURE_MODEL_NAME!;
 const deployment = process.env.AZURE_DEPLOYMENT_NAME!;
 const apiKey = process.env.AZURE_API_KEY!;
-const apiVersion = process.env.API_VERSION!;
+
+async function preprocessImage(imagePath: string, outputPath: string, rotate: number) {
+  const image = sharp(imagePath);
+  const { width, height } = await image.metadata();
+  const left = 300;
+  const top = 300;
+  const cropWidth = width - (left*2);   // ตัดซ้าย+ขวา 200+200 รวม 400px
+  const cropHeight = height - (top*2); // ตัดบน+ล่าง 200 + 200 รวม 400px
+
+  const processedImage = await sharp(imagePath)
+    .extract({ left: left, top: top, width: cropWidth, height: cropHeight })
+    .rotate(rotate);
+
+  if (outputPath) {
+    await processedImage.toFile(outputPath);
+  }
+  const croppedBuffer = await processedImage.toBuffer();
+  return croppedBuffer;
+}
 
 const schema = z.object({
   modelNumber: z
@@ -28,6 +44,10 @@ export const extractSerialFromImage = async (imagePath: string) => {
 
   const model = azure(deployment);
 
+  const now = Date.now();
+  const outputPath = `./output_cropped_${now}.jpg`;
+
+  const imageBuffer = await preprocessImage(imagePath, outputPath, -90);
   const { object } = await generateObject({
     model,
     system:
@@ -41,7 +61,7 @@ export const extractSerialFromImage = async (imagePath: string) => {
         content: [
           {
             type: "image",
-            image: readFileSync(imagePath),
+            image: imageBuffer,
           },
         ],
       },
@@ -53,7 +73,7 @@ export const extractSerialFromImage = async (imagePath: string) => {
 
 async function main() {
   const result = await extractSerialFromImage(
-    path.join(__dirname, "./test_battery6.jpg")
+    path.join(__dirname, "./test-ocr.jpg")
   );
   console.log(result);
 }
