@@ -1,9 +1,11 @@
 import "dotenv/config";
 import { AzureOpenAI } from "openai";
 
-const endpoint = process.env.AZURE_ENDPOINT!;
 const modelName = process.env.AZURE_MODEL_NAME!;
 const deployment = process.env.AZURE_DEPLOYMENT_NAME!;
+
+const endpoint = process.env.AZURE_OPENAI!;
+console.log(endpoint);
 
 export async function main() {
 
