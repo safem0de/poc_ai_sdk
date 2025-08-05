@@ -53,7 +53,7 @@ export const extractSerialFromImage = async (imagePath: string) => {
 
 async function main() {
   const result = await extractSerialFromImage(
-    path.join(__dirname, "./test_battery6.jpg")
+    path.join(__dirname, "./test-battery5.jpg")
   );
   console.log(result);
 }

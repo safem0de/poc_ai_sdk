@@ -8,15 +8,15 @@ import sharp from "sharp";
 const deployment = process.env.AZURE_DEPLOYMENT_NAME!;
 const apiKey = process.env.AZURE_API_KEY!;
 
-async function preprocessImage(imagePath: string, outputPath: string, rotate: number) {
+async function preprocessImage(imagePath: string, pixelCrop:number, outputPath: string, rotate: number) {
   const image = sharp(imagePath);
   const { width, height } = await image.metadata();
-  const left = 300;
-  const top = 300;
-  const cropWidth = width - (left*2);   // ตัดซ้าย+ขวา 200+200 รวม 400px
-  const cropHeight = height - (top*2); // ตัดบน+ล่าง 200 + 200 รวม 400px
+  const left = pixelCrop;
+  const top = pixelCrop;
+  const cropWidth = width - (left*2);   // ตัดซ้าย+ขวา เช่น 200+200 รวม 400px
+  const cropHeight = height - (top*2); // ตัดบน+ล่าง เช่น 200 + 200 รวม 400px
 
-  const processedImage = await sharp(imagePath)
+  const processedImage = sharp(imagePath)
     .extract({ left: left, top: top, width: cropWidth, height: cropHeight })
     .rotate(rotate);
 
@@ -47,7 +47,7 @@ export const extractSerialFromImage = async (imagePath: string) => {
   const now = Date.now();
   const outputPath = `./output_cropped_${now}.jpg`;
 
-  const imageBuffer = await preprocessImage(imagePath, outputPath, -90);
+  const imageBuffer = await preprocessImage(imagePath, 0, outputPath, 180);
   const { object } = await generateObject({
     model,
     system:
@@ -73,7 +73,7 @@ export const extractSerialFromImage = async (imagePath: string) => {
 
 async function main() {
   const result = await extractSerialFromImage(
-    path.join(__dirname, "./test-ocr.jpg")
+    path.join(__dirname, "./test-real-data2.jpg")
   );
   console.log(result);
 }
